@@ -50,26 +50,74 @@ Camadas de suporte:
 5. E2E simples sem framework pesado para validar fluxo real HTTP + persistencia.
 6. SQLite em testes E2E para execucao isolada e rapida; PostgreSQL para runtime.
 
-## Como Rodar (Docker - Recomendado)
-Na raiz do projeto:
+## Como Executar o Projeto
+Pre-requisitos:
+- Docker e Docker Compose
+- Git
 
+### Clonagem do Repositorio
 ```bash
-docker compose up -d --build
+git clone https://github.com/MoisesHMQ/desafio-tecnico-tecprimee.git
+cd desafio-tecnico-tecprimee
 ```
 
-Acessos:
+### Configuracao do Ambiente (.env)
+Para execucao via Docker Compose, este projeto ja possui configuracao padrao no `docker-compose.yml`.
+
+Se quiser customizar variaveis do backend, crie `backend/.env` com:
+
+```env
+DB_TYPE=postgres
+DB_HOST=postgres
+DB_PORT=5432
+DB_NAME=tecprime_db
+DB_USER=postgres
+DB_PASS=123456
+PORT=3333
+JWT_SECRET=UmaSenhaSuperSecretaECompridaParaOSeuTokenJWT2026
+JWT_EXPIRES_IN=1d
+FRONTEND_URL=http://localhost:4200
+```
+
+### Inicializacao via Docker Compose
+Execute o comando para realizar o build das imagens e subir os servicos:
+
+```bash
+docker compose up --build -d
+```
+
+### Acesso
 - Frontend: `http://localhost:4200`
-- Backend: `http://localhost:3333`
-- Swagger: `http://localhost:3333/api-docs`
-- PostgreSQL: `localhost:5433`
-
-Parar:
-
-```bash
-docker compose down
-```
+- Backend API: `http://localhost:3333`
+- Backend Swagger: `http://localhost:3333/api-docs`
 
 ## Como Rodar Localmente (sem Docker)
+Pre-requisitos:
+- Node.js 20+
+- npm
+- PostgreSQL rodando localmente (porta 5433 mapeada para o banco do projeto)
+
+### Clonagem do Repositorio
+```bash
+git clone https://github.com/MoisesHMQ/desafio-tecnico-tecprimee.git
+cd desafio-tecnico-tecprimee
+```
+
+### Configuracao do Ambiente Local (`backend/.env`)
+Para rodar sem Docker, use:
+
+```env
+DB_TYPE=postgres
+DB_HOST=localhost
+DB_PORT=5433
+DB_NAME=tecprime_db
+DB_USER=postgres
+DB_PASS=123456
+PORT=3333
+JWT_SECRET=UmaSenhaSuperSecretaECompridaParaOSeuTokenJWT2026
+JWT_EXPIRES_IN=1d
+FRONTEND_URL=http://localhost:4200
+```
 
 ### Backend
 ```bash
@@ -124,9 +172,25 @@ Exemplo em `backend/.env`:
 - `FRONTEND_URL`
 
 ## Melhorias Futuras
-1. Testes unitarios por modulo (services/DTOs).
-2. Observabilidade (logs estruturados e tracing).
-3. Controle transacional de estoque no pedido.
-4. Controle transacional de estoque no pedido.
-
-
+1. Testes automatizados por camada:
+   - unitarios para services/DTOs
+   - integracao para repositorios
+   - E2E cobrindo cenarios de erro e autorizacao.
+2. Controle transacional de estoque:
+   - reserva/baixa atomica por pedido
+   - prevencao de overselling em concorrencia.
+3. Observabilidade e operacao:
+   - logs estruturados (JSON)
+   - correlation id por requisicao
+   - metricas de latencia e taxa de erro.
+4. Seguranca e governanca:
+   - refresh token e rotacao de token
+   - hardening de CORS e headers por ambiente.
+5. Frontend production-ready:
+   - tratamento global de erros HTTP
+   - loading/skeleton states em telas criticas
+   - testes de componentes e rotas.
+6. CI/CD:
+   - pipeline com lint, test e build
+   - validacao de Docker image
+   - deploy automatizado por ambiente.
