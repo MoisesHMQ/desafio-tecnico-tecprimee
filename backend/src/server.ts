@@ -3,6 +3,7 @@ import express from "express";
 import { AppDataSource } from "./database/data-source";
 import { setupSwagger } from "./docs/swagger";
 import { authRoutes } from "./modules/auth/auth.routes";
+import { productRoutes } from "./modules/products/product.routes";
 import { errorHandler, notFoundHandler } from "./shared/http/error-handler";
 import { securityHeaders } from "./shared/middlewares/security.middleware";
 
@@ -20,6 +21,7 @@ app.get("/", (_req, res) => {
 });
 
 app.use("/auth", authRoutes);
+app.use("/products", productRoutes);
 setupSwagger(app);
 app.use(notFoundHandler);
 app.use(errorHandler);
