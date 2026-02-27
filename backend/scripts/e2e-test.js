@@ -135,6 +135,9 @@ const run = async () => {
     server = startServer();
     await waitForServer();
 
+    const unauthorizedProducts = await request("/products", { method: "GET" });
+    assert(unauthorizedProducts.status === 401, "Produtos sem token deveria retornar 401.");
+
     const uniqueEmail = `e2e_${Date.now()}@mail.com`;
 
     const register = await request("/auth/register", {
@@ -149,6 +152,15 @@ const run = async () => {
     assert(register.status === 201, "Falha no registro de usuario.");
     assert(register.data?.token, "Token nao retornado no registro.");
     const token = register.data.token;
+
+    const myOrdersBefore = await request("/orders/me", {
+      method: "GET",
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    assert(myOrdersBefore.status === 200, "Falha ao consultar /orders/me antes da compra.");
+    assert(Array.isArray(myOrdersBefore.data?.data), "Resposta de /orders/me invalida.");
+    assert(myOrdersBefore.data.data.length === 0, "Usuario novo deveria iniciar sem pedidos.");
 
     const products = await request("/products?page=1&limit=5&sortBy=price&order=asc", {
       method: "GET",
@@ -180,6 +192,7 @@ const run = async () => {
     assert(createOrder.data?.data?.orderNumber, "orderNumber nao retornado.");
 
     const orderId = createOrder.data.data.orderId;
+    const orderNumber = createOrder.data.data.orderNumber;
 
     const getOrder = await request(`/orders/${orderId}`, {
       method: "GET",
@@ -189,6 +202,26 @@ const run = async () => {
     assert(getOrder.status === 200, "Falha ao consultar pedido.");
     assert(getOrder.data?.data?.id === orderId, "ID do pedido retornado nao confere.");
     assert(Array.isArray(getOrder.data?.data?.items), "Itens do pedido nao retornados.");
+
+    const myOrdersAfter = await request("/orders/me", {
+      method: "GET",
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    assert(myOrdersAfter.status === 200, "Falha ao consultar /orders/me apos compra.");
+    assert(myOrdersAfter.data?.data?.length === 1, "Usuario deveria possuir 1 pedido apos compra.");
+    assert(
+      myOrdersAfter.data.data[0].id === orderId,
+      "Pedido criado nao apareceu em /orders/me."
+    );
+    assert(
+      myOrdersAfter.data.data[0].orderNumber === orderNumber,
+      "orderNumber retornado em /orders/me nao confere."
+    );
+    assert(
+      myOrdersAfter.data.data[0].totalItems === 2,
+      "totalItems em /orders/me nao confere."
+    );
 
     const counts = await getSqliteCounts();
     assert(counts.users >= 1, "Usuario nao persistido no banco.");
