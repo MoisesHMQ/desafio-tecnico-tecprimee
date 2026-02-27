@@ -18,6 +18,7 @@ const swaggerSpec = {
     { name: "Health", description: "Status da API" },
     { name: "Auth", description: "Autenticacao e usuarios" },
     { name: "Products", description: "Consulta de produtos" },
+    { name: "Orders", description: "Criacao e consulta de pedidos" },
   ],
   components: {
     securitySchemes: {
@@ -88,6 +89,78 @@ const swaggerSpec = {
           data: {
             type: "array",
             items: { $ref: "#/components/schemas/Product" },
+          },
+        },
+      },
+      CreateOrderRequest: {
+        type: "object",
+        required: ["name", "email", "address", "paymentMethod", "products"],
+        properties: {
+          name: { type: "string", example: "Maria Souza" },
+          email: { type: "string", format: "email", example: "maria@email.com" },
+          address: { type: "string", example: "Rua A, 123 - Centro" },
+          paymentMethod: { type: "string", enum: ["Pix", "Cartao", "Boleto"], example: "Pix" },
+          products: {
+            type: "array",
+            items: {
+              type: "object",
+              required: ["productId", "quantity"],
+              properties: {
+                productId: { type: "number", example: 1 },
+                quantity: { type: "number", example: 2 },
+              },
+            },
+          },
+        },
+      },
+      CreateOrderResponse: {
+        type: "object",
+        properties: {
+          message: { type: "string", example: "Pedido criado com sucesso." },
+          data: {
+            type: "object",
+            properties: {
+              orderId: { type: "string", format: "uuid" },
+              orderNumber: { type: "number", example: 1001 },
+              createdAt: { type: "string", format: "date-time" },
+            },
+          },
+        },
+      },
+      OrderDetailsResponse: {
+        type: "object",
+        properties: {
+          message: { type: "string", example: "Pedido encontrado." },
+          data: {
+            type: "object",
+            properties: {
+              id: { type: "string", format: "uuid" },
+              orderNumber: { type: "number", example: 1001 },
+              customer: {
+                type: "object",
+                properties: {
+                  name: { type: "string" },
+                  email: { type: "string", format: "email" },
+                  address: { type: "string" },
+                },
+              },
+              paymentMethod: { type: "string", example: "PIX" },
+              totalAmount: { type: "number", example: 199.98 },
+              createdAt: { type: "string", format: "date-time" },
+              items: {
+                type: "array",
+                items: {
+                  type: "object",
+                  properties: {
+                    productId: { type: "number" },
+                    productName: { type: "string" },
+                    quantity: { type: "number" },
+                    price: { type: "number" },
+                    subtotal: { type: "number" },
+                  },
+                },
+              },
+            },
           },
         },
       },
@@ -189,6 +262,7 @@ const swaggerSpec = {
       get: {
         tags: ["Products"],
         summary: "Lista produtos normalizados da API externa",
+        security: [{ bearerAuth: [] }],
         parameters: [
           {
             in: "query",
@@ -246,6 +320,80 @@ const swaggerSpec = {
           },
           "502": {
             description: "Falha ao consultar API externa",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/ErrorResponse" },
+              },
+            },
+          },
+        },
+      },
+    },
+    "/orders": {
+      post: {
+        tags: ["Orders"],
+        summary: "Cria um novo pedido",
+        security: [{ bearerAuth: [] }],
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: { $ref: "#/components/schemas/CreateOrderRequest" },
+            },
+          },
+        },
+        responses: {
+          "201": {
+            description: "Pedido criado",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/CreateOrderResponse" },
+              },
+            },
+          },
+          "404": {
+            description: "Produto nao encontrado",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/ErrorResponse" },
+              },
+            },
+          },
+          "422": {
+            description: "Erro de validacao",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/ErrorResponse" },
+              },
+            },
+          },
+        },
+      },
+    },
+    "/orders/{id}": {
+      get: {
+        tags: ["Orders"],
+        summary: "Busca pedido por ID",
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          {
+            in: "path",
+            name: "id",
+            required: true,
+            schema: { type: "string", format: "uuid" },
+          },
+        ],
+        responses: {
+          "200": {
+            description: "Pedido encontrado",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/OrderDetailsResponse" },
+              },
+            },
+          },
+          "404": {
+            description: "Pedido nao encontrado",
             content: {
               "application/json": {
                 schema: { $ref: "#/components/schemas/ErrorResponse" },

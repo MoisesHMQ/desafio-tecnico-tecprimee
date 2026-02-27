@@ -2,6 +2,7 @@ import {
   Entity,
   PrimaryGeneratedColumn,
   Column,
+  Generated,
   ManyToOne,
   OneToMany,
   CreateDateColumn,
@@ -10,17 +11,27 @@ import {
 import { User } from "./User";
 import { OrderItem } from "./OrderItem";
 
+export enum PaymentMethod {
+  PIX = "PIX",
+  CARTAO = "CARTAO",
+  BOLETO = "BOLETO",
+}
+
 @Entity("orders")
 export class Order {
   @PrimaryGeneratedColumn("uuid")
   id!: string;
 
-  @Column()
-  user_id!: string;
+  @Column({ type: "integer", unique: true })
+  @Generated("increment")
+  orderNumber!: number;
 
-  @ManyToOne(() => User, (user) => user.orders)
+  @Column({ nullable: true })
+  user_id!: string | null;
+
+  @ManyToOne(() => User, (user) => user.orders, { nullable: true, onDelete: "SET NULL" })
   @JoinColumn({ name: "user_id" })
-  user!: User;
+  user!: User | null;
 
   @Column()
   customerName!: string;
@@ -31,8 +42,8 @@ export class Order {
   @Column()
   address!: string;
 
-  @Column()
-  paymentMethod!: string;
+  @Column({ type: "enum", enum: PaymentMethod })
+  paymentMethod!: PaymentMethod;
 
   @Column("decimal", { precision: 10, scale: 2 })
   totalAmount!: number;
