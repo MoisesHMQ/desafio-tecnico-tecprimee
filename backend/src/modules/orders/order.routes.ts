@@ -10,6 +10,7 @@ const orderService = new OrderService(externalProductApi);
 const orderController = new OrderController(orderService);
 
 orderRoutes.post("/", asyncHandler(orderController.create));
+orderRoutes.get("/me", asyncHandler(orderController.listMine));
 orderRoutes.get("/:id", asyncHandler(orderController.getById));
 
 export { orderRoutes };

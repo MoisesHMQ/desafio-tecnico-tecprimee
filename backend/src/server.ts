@@ -1,3 +1,4 @@
+import cors from "cors";
 import dotenv from "dotenv";
 import express from "express";
 import { AppDataSource } from "./database/data-source";
@@ -13,8 +14,16 @@ dotenv.config();
 
 const app = express();
 const serverPort = Number(process.env.PORT ?? 3333);
+const frontendUrl = process.env.FRONTEND_URL ?? "http://localhost:4200";
 
 app.disable("x-powered-by");
+app.use(
+  cors({
+    origin: frontendUrl,
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  })
+);
 app.use(securityHeaders);
 app.use(express.json());
 

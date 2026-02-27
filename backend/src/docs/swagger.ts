@@ -164,6 +164,26 @@ const swaggerSpec = {
           },
         },
       },
+      UserOrdersListResponse: {
+        type: "object",
+        properties: {
+          message: { type: "string", example: "Pedidos do usuario logado." },
+          data: {
+            type: "array",
+            items: {
+              type: "object",
+              properties: {
+                id: { type: "string", format: "uuid" },
+                orderNumber: { type: "number", example: 1002 },
+                paymentMethod: { type: "string", example: "PIX" },
+                totalAmount: { type: "number", example: 120.5 },
+                createdAt: { type: "string", format: "date-time" },
+                totalItems: { type: "number", example: 3 },
+              },
+            },
+          },
+        },
+      },
     },
   },
   paths: {
@@ -361,6 +381,31 @@ const swaggerSpec = {
           },
           "422": {
             description: "Erro de validacao",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/ErrorResponse" },
+              },
+            },
+          },
+        },
+      },
+    },
+    "/orders/me": {
+      get: {
+        tags: ["Orders"],
+        summary: "Lista os pedidos do usuario autenticado",
+        security: [{ bearerAuth: [] }],
+        responses: {
+          "200": {
+            description: "Lista de pedidos do usuario logado",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/UserOrdersListResponse" },
+              },
+            },
+          },
+          "401": {
+            description: "Nao autenticado",
             content: {
               "application/json": {
                 schema: { $ref: "#/components/schemas/ErrorResponse" },

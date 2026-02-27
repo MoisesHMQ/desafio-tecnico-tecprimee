@@ -32,6 +32,15 @@ type OrderDetailsResponse = {
   }>;
 };
 
+type UserOrderListItem = {
+  id: string;
+  orderNumber: number;
+  paymentMethod: string;
+  totalAmount: number;
+  createdAt: Date;
+  totalItems: number;
+};
+
 export class OrderService {
   private readonly orderRepository: Repository<Order>;
   private readonly orderItemRepository: Repository<OrderItem>;
@@ -41,7 +50,10 @@ export class OrderService {
     this.orderItemRepository = AppDataSource.getRepository(OrderItem);
   }
 
-  public async createOrder(data: CreateOrderDTO): Promise<CreateOrderResponse> {
+  public async createOrder(
+    data: CreateOrderDTO,
+    userId: string
+  ): Promise<CreateOrderResponse> {
     const externalProducts = await this.externalProductApi.getAllProducts();
     const productsById = new Map(externalProducts.map((product) => [product.id, product]));
 
@@ -80,7 +92,7 @@ export class OrderService {
       paymentMethod: data.paymentMethod,
       totalAmount,
       items,
-      user_id: null,
+      user_id: userId,
     });
 
     const savedOrder = await this.orderRepository.save(order);
@@ -127,6 +139,23 @@ export class OrderService {
       items,
     };
   }
+
+  public async listOrdersByUser(userId: string): Promise<UserOrderListItem[]> {
+    const orders = await this.orderRepository.find({
+      where: { user_id: userId },
+      relations: { items: true },
+      order: { createdAt: "DESC" },
+    });
+
+    return orders.map((order) => ({
+      id: order.id,
+      orderNumber: order.orderNumber,
+      paymentMethod: order.paymentMethod,
+      totalAmount: Number(order.totalAmount),
+      createdAt: order.createdAt,
+      totalItems: order.items.reduce((sum, item) => sum + item.quantity, 0),
+    }));
+  }
 }
 
-export type { CreateOrderResponse, OrderDetailsResponse };
+export type { CreateOrderResponse, OrderDetailsResponse, UserOrderListItem };
