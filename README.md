@@ -172,25 +172,9 @@ Exemplo em `backend/.env`:
 - `FRONTEND_URL`
 
 ## Melhorias Futuras
-1. Testes automatizados por camada:
-   - unitarios para services/DTOs
-   - integracao para repositorios
-   - E2E cobrindo cenarios de erro e autorizacao.
-2. Controle transacional de estoque:
-   - reserva/baixa atomica por pedido
-   - prevencao de overselling em concorrencia.
-3. Observabilidade e operacao:
-   - logs estruturados (JSON)
-   - correlation id por requisicao
-   - metricas de latencia e taxa de erro.
-4. Seguranca e governanca:
-   - refresh token e rotacao de token
-   - hardening de CORS e headers por ambiente.
-5. Frontend production-ready:
-   - tratamento global de erros HTTP
-   - loading/skeleton states em telas criticas
-   - testes de componentes e rotas.
-6. CI/CD:
-   - pipeline com lint, test e build
-   - validacao de Docker image
-   - deploy automatizado por ambiente.
+1. Melhorar cobertura de testes (unitario, integracao e E2E).
+2. Adicionar controle transacional de estoque.
+3. Implementar logs estruturados e metricas basicas.
+4. Reforcar seguranca com refresh token e politicas por ambiente.
+5. Melhorar tratamento de erros e estados de loading no frontend.
+6. Criar pipeline CI/CD com lint, testes e build automatizados.
