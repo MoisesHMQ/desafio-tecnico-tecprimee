@@ -1,3 +1,8 @@
 node_modules/
-.env
 dist/
+tmp/
+coverage/
+
+.env
+.env.example
+.env.test

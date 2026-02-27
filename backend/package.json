@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
     "build": "tsc",
-    "start": "node dist/server.js"
+    "start": "node dist/server.js",
+    "test:e2e": "npm run build && node scripts/e2e-test.js"
   },
   "keywords": [],
   "author": "",
@@ -27,6 +28,7 @@
     "jsonwebtoken": "^9.0.2",
     "pg": "^8.19.0",
     "reflect-metadata": "^0.2.2",
+    "sqlite3": "^5.1.7",
     "swagger-ui-express": "^5.0.1",
     "typeorm": "^0.3.28"
   }

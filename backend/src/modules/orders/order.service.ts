@@ -66,7 +66,14 @@ export class OrderService {
         .toFixed(2)
     );
 
+    const maxResult = await this.orderRepository
+      .createQueryBuilder("order")
+      .select("MAX(order.orderNumber)", "max")
+      .getRawOne<{ max: string | null }>();
+    const nextOrderNumber = Number(maxResult?.max ?? 0) + 1;
+
     const order = this.orderRepository.create({
+      orderNumber: nextOrderNumber,
       customerName: data.name,
       email: data.email,
       address: data.address,

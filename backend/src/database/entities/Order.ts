@@ -2,7 +2,6 @@ import {
   Entity,
   PrimaryGeneratedColumn,
   Column,
-  Generated,
   ManyToOne,
   OneToMany,
   CreateDateColumn,
@@ -23,10 +22,9 @@ export class Order {
   id!: string;
 
   @Column({ type: "integer", unique: true })
-  @Generated("increment")
   orderNumber!: number;
 
-  @Column({ nullable: true })
+  @Column({ type: "uuid", nullable: true })
   user_id!: string | null;
 
   @ManyToOne(() => User, (user) => user.orders, { nullable: true, onDelete: "SET NULL" })
@@ -42,7 +40,10 @@ export class Order {
   @Column()
   address!: string;
 
-  @Column({ type: "enum", enum: PaymentMethod })
+  @Column({
+    type: process.env.DB_TYPE === "sqlite" ? "simple-enum" : "enum",
+    enum: PaymentMethod,
+  })
   paymentMethod!: PaymentMethod;
 
   @Column("decimal", { precision: 10, scale: 2 })
