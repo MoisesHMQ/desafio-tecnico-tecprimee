@@ -134,12 +134,37 @@ npm start
 ```
 
 ## Teste E2E
-No backend:
+O E2E do projeto fica no backend (`npm run test:e2e`) e usa SQLite isolado para o teste.
 
+### Opcao 1: Rodar localmente (sem Docker)
 ```bash
 cd backend
+npm install
 npm run test:e2e
 ```
+
+### Opcao 2: Rodar via Docker (recomendado para ambiente limpo)
+Linux/macOS:
+```bash
+docker run --rm -t \
+  -v "$(pwd)/backend:/app" \
+  -w /app \
+  node:20-slim \
+  sh -c "npm ci && npm run test:e2e"
+```
+
+PowerShell (Windows):
+```powershell
+docker run --rm -t `
+  -v "${PWD}/backend:/app" `
+  -w /app `
+  node:20-slim `
+  sh -c "npm ci && npm run test:e2e"
+```
+
+Observacao:
+- O E2E nao depende do Postgres do `docker compose`, porque ele sobe a API em modo de teste com SQLite.
+- O container `backend` do `docker-compose.yml` eh imagem de runtime (producao), entao para E2E use o comando acima com `node:20-slim`.
 
 Esse teste:
 - sobe a API compilada

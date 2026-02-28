@@ -29,7 +29,7 @@ export class AuthService {
     });
 
     if (existingUser) {
-      throw new AppError("E-mail já cadastrado.", 409, "EMAIL_ALREADY_EXISTS");
+      throw new AppError("Email already registered.", 409, "EMAIL_ALREADY_EXISTS");
     }
 
     const passwordHash = await bcrypt.hash(data.password, 12);
