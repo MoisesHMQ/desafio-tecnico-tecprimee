@@ -1,6 +1,11 @@
 import { Injectable, computed, signal } from "@angular/core";
 import { CartItem, Product } from "../models";
 
+export interface CartAddResult {
+  ok: boolean;
+  message: string;
+}
+
 @Injectable({ providedIn: "root" })
 export class CartStore {
   readonly items = signal<CartItem[]>([]);
@@ -11,14 +16,22 @@ export class CartStore {
     this.items().reduce((sum, item) => sum + item.quantity, 0)
   );
 
-  add(product: Product) {
+  add(product: Product): CartAddResult {
+    if (product.estoque <= 0) {
+      return { ok: false, message: "Product out of stock." };
+    }
+
     const existing = this.items().find((item) => item.id === product.id);
     if (existing) {
+      if (existing.quantity >= product.estoque) {
+        return { ok: false, message: "Maximum stock reached for this item." };
+      }
       this.updateQuantity(product.id, existing.quantity + 1);
-      return;
+      return { ok: true, message: "Item added to cart." };
     }
 
     this.items.update((items) => [...items, { ...product, quantity: 1 }]);
+    return { ok: true, message: "Item added to cart." };
   }
 
   updateQuantity(productId: number, quantity: number) {
@@ -40,4 +53,3 @@ export class CartStore {
     this.items.set([]);
   }
 }
-

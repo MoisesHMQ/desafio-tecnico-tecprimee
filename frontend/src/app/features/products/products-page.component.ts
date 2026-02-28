@@ -6,6 +6,7 @@ import { ProductsService } from "../../core/services/products.service";
 import { HeaderComponent } from "../../shared/layout/header.component";
 import { Product } from "../../shared/models";
 import { CartStore } from "../../shared/services/cart.store";
+import { ToastService } from "../../shared/services/toast.service";
 
 @Component({
   standalone: true,
@@ -39,7 +40,7 @@ import { CartStore } from "../../shared/services/cart.store";
             <h3>{{ item.nome }}</h3>
             <p class="muted">{{ item.descricao }}</p>
             <p class="price">R$ {{ item.preco | number : "1.2-2" }}</p>
-            <button class="btn btn-primary" (click)="cartStore.add(item)">
+            <button class="btn btn-primary" (click)="addToCart(item)">
               Add to cart
             </button>
           </div>
@@ -145,7 +146,8 @@ export class ProductsPageComponent implements OnInit {
 
   constructor(
     private readonly productsService: ProductsService,
-    public readonly cartStore: CartStore
+    public readonly cartStore: CartStore,
+    private readonly toast: ToastService
   ) {}
 
   ngOnInit(): void {
@@ -168,5 +170,14 @@ export class ProductsPageComponent implements OnInit {
         this.totalPages.set(response.totalPages);
       });
   }
-}
 
+  addToCart(product: Product): void {
+    const result = this.cartStore.add(product);
+    if (result.ok) {
+      this.toast.success(result.message);
+      return;
+    }
+
+    this.toast.error(result.message);
+  }
+}

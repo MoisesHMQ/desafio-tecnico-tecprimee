@@ -7,6 +7,7 @@ import { OrdersService } from "../../core/services/orders.service";
 import { HeaderComponent } from "../../shared/layout/header.component";
 import { PaymentMethod } from "../../shared/models";
 import { CartStore } from "../../shared/services/cart.store";
+import { ToastService } from "../../shared/services/toast.service";
 
 @Component({
   standalone: true,
@@ -113,6 +114,7 @@ export class CheckoutPageComponent {
   private readonly authService = inject(AuthService);
   private readonly ordersService = inject(OrdersService);
   private readonly router = inject(Router);
+  private readonly toast = inject(ToastService);
 
   loading = false;
   error = "";
@@ -149,11 +151,13 @@ export class CheckoutPageComponent {
       .subscribe({
         next: (response) => {
           const orderId = response.data.orderId;
+          this.toast.success("Order placed successfully.");
           this.cartStore.clear();
           this.router.navigateByUrl(`/order-confirmation/${orderId}`);
         },
         error: (err) => {
           this.error = err?.error?.message ?? "Could not create order.";
+          this.toast.error(this.error);
           this.loading = false;
         },
       });

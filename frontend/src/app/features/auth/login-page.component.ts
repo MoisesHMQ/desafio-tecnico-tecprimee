@@ -3,6 +3,7 @@ import { Component, inject } from "@angular/core";
 import { FormBuilder, ReactiveFormsModule, Validators } from "@angular/forms";
 import { Router, RouterLink } from "@angular/router";
 import { AuthService } from "../../core/services/auth.service";
+import { ToastService } from "../../shared/services/toast.service";
 
 @Component({
   standalone: true,
@@ -11,8 +12,7 @@ import { AuthService } from "../../core/services/auth.service";
     <main class="auth-shell">
       <section class="auth-card card">
         <img class="logo" src="/assets/tecprime-logo.svg" alt="Tecprime" />
-        <h1>Welcome Back</h1>
-        <p class="sub">Login to continue shopping</p>
+        <h1>Welcome</h1>
 
         <form [formGroup]="form" (ngSubmit)="submit()">
           <div class="field">
@@ -80,6 +80,7 @@ export class LoginPageComponent {
   private readonly fb = inject(FormBuilder);
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
+  private readonly toast = inject(ToastService);
 
   loading = false;
   error = "";
@@ -98,9 +99,17 @@ export class LoginPageComponent {
     this.error = "";
 
     this.authService.login(this.form.getRawValue()).subscribe({
-      next: () => this.router.navigateByUrl("/products"),
+      next: () => {
+        this.toast.success("Logged in successfully.");
+        this.router.navigateByUrl("/products");
+      },
       error: (err) => {
-        this.error = err?.error?.message ?? "Login failed.";
+        const errorCode = err?.error?.code;
+        this.error =
+          errorCode === "INVALID_CREDENTIALS"
+            ? "Invalid credentials."
+            : "Login failed.";
+        this.toast.error(this.error);
         this.loading = false;
       },
     });
